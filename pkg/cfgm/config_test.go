@@ -377,6 +377,49 @@ func TestLoadWithBaseDir(t *testing.T) {
 	})
 }
 
+// TestLoadWithCallerSkip 测试自定义调用栈跳过层数
+func TestLoadWithCallerSkip(t *testing.T) {
+	type ServerConfig struct {
+		Addr string `koanf:"addr"`
+	}
+	type Config struct {
+		Server ServerConfig `koanf:"server"`
+	}
+
+	// 封装函数模拟深层调用栈
+	loadWithWrapper := func(skip int) (*Config, error) {
+		return Load(
+			Config{Server: ServerConfig{Addr: "default"}},
+			WithConfigPaths("config/config.example.yaml"),
+			WithCallerSkip(skip),
+		)
+	}
+
+	t.Run("with explicit callerSkip", func(t *testing.T) {
+		// 使用显式的 callerSkip 值
+		// skip=2 表示：跳过 load → Load → loadWithWrapper
+		cfg, err := loadWithWrapper(2)
+		require.NoError(t, err)
+		assert.NotNil(t, cfg)
+		// 验证配置文件被成功加载（说明项目根目录被正确找到）
+		assert.Equal(t, ":8080", cfg.Server.Addr)
+	})
+
+	t.Run("WithBaseDir takes precedence", func(t *testing.T) {
+		// 验证 WithBaseDir 优先于 callerSkip
+		// 当设置了 WithBaseDir 时，callerSkip 不应该影响结果
+		tmpFile := writeTempConfig(t, `server: {addr: ":9999"}`)
+		cfg, err := Load(
+			Config{Server: ServerConfig{Addr: "default"}},
+			WithBaseDir(""),          // 显式设置 baseDir
+			WithCallerSkip(999),      // 即使设置了错误的 callerSkip
+			WithConfigPaths(tmpFile), // 使用绝对路径
+		)
+		require.NoError(t, err)
+		assert.Equal(t, ":9999", cfg.Server.Addr)
+	})
+}
+
 // =============================================================================
 // CLI Flags 测试 (github.com/urfave/cli/v3)
 // =============================================================================
