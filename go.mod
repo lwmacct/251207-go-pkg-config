@@ -10,8 +10,8 @@ require (
 	github.com/knadh/koanf/providers/rawbytes v1.0.0
 	github.com/knadh/koanf/providers/structs v1.0.0
 	github.com/knadh/koanf/v2 v2.3.0
-	github.com/lwmacct/251207-go-pkg-version v0.0.4
-	github.com/lwmacct/251219-go-pkg-logm v0.1.2
+	github.com/lwmacct/251207-go-pkg-version v0.1.260109
+	github.com/lwmacct/251219-go-pkg-logm v0.2.260114
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.6.1
 	go.yaml.in/yaml/v3 v3.0.4
